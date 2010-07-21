@@ -8,9 +8,11 @@ function react_to(obj, meth){
 	var react_with = function(reaction){
 		if(!reaction){ obj[meth] = obj[RIP][meth]; virgin = true; return react_with; }
 		var action = virgin? obj[RIP][meth]: obj[meth]; virgin = false;
-		obj[meth] = function(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P_Q_R_S_T_U_V_W_X_Y_Z){
-			var act = action(_A,_B,_C,_D,_E,_F,_G,_H,_I,_J,_K,_L,_M,_N,_O,_P_Q_R_S_T_U_V_W_X_Y_Z);
-			return reaction(obj, meth, act, arguments) || act;
+		obj[meth] = function(){
+			var arg_to_arr = function(args){var arr = []; for(var arg in args) arr.push(args[arg]); return arr; };
+			var a = arg_to_arr(arguments);
+			var act = action(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10]);
+			return reaction(obj, meth, act, a) || act;
 		}; return react_with;
 	}; return react_with;
 }
