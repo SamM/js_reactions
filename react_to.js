@@ -29,3 +29,4 @@ function react_to_many(objects, methods){
 	};
 	return react_with;
 }
+alert(1);
