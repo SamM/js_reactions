@@ -1,30 +1,35 @@
-function react_to(obj, meth){
-	var hop = function(has, obj, prop){ var does = obj.hasOwnProperty(prop); return has?does:!does; };
-	var virgin = true, RIP = '__originals';
-	if(hop(false, obj, RIP)) obj[RIP] = { };
-	if(hop(false, obj[RIP], meth)) obj[RIP][meth] = obj[meth] || function(x){return x};
-	else virgin = false;
-	
-	var react_with = function(reaction){
-		if(!reaction){ obj[meth] = obj[RIP][meth]; virgin = true; return react_with; }
-		var action = virgin? obj[RIP][meth]: obj[meth]; virgin = false;
-		obj[meth] = function(){
-			var a = Array.prototype.slice.call(arguments);
-			var act = action(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10]);
-			return reaction(obj, meth, act, a) || act;
-		}; return react_with;
-	}; return react_with;
+var When = function(subject, action){
+	if(!subject.hasOwnProperty('__events')) subject['__events'] = {};
+	with(original = subject[action], events = subject['__events']){
+		if(!events.hasOwnProperty(action)){
+			var self = events[action] = {
+				'listeners':[],
+				'remove': function(listener){
+					if(i = self['listeners'].indexOf(listener)) self['listeners'].splice(i,1); },
+				'remove_all': function(){ self['listeners'] = [] },
+				'tell_all': function(args){
+					if(self['listeners'].length){ 
+						for(var l=0; l<self['listeners'].length; l++) self['listeners'][l](args); 
+					}
+				}
+			};
+			
+			subject[action] = function(){
+				var a = [].slice.call(arguments); events[action].tell_all(arguments);
+				return original(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[9],a[10]);
+			};
+		}
+		var $Self = function(listener, remove){
+			if(remove){
+				if(listener) events[action].remove(listener);
+				else events[action].remove_all();
+				return $Self;
+			}
+			if(listener) events[action]['listeners'].push(listener); // Add listener to before or after original
+			else events[action].remove_all(); // Remove all listeners
+			return $Self;
+		}
+		return $Self;
+	}
 }
-
-function react_to_many(objects, methods){
-	objects = (objects instanceof Array)?objects:[objects];
-	methods = (methods instanceof Array)?methods:[methods];
-	
-	var react_with = function(reaction){
-		for(var o = 0; o < objects.length; o++){ 
-			for(var m = 0; m < methods.length; m++){ 
-				react_to(objects[o], methods[m])(reaction);}}
-		return react_with;
-	};
-	return react_with;
-}
+exports.when = When;
