@@ -1,6 +1,9 @@
-var When = function(subject, action){
+var Whenever = function(subject, action, conditions){
 	if(!subject.hasOwnProperty('__events')) subject['__events'] = {};
-	with(original = subject[action], events = subject['__events']){
+	if(!conditions) conditions = function(){return true;}
+	if(typeof subject[action] != 'function') subject[action] = function(){};
+	var original = subject[action];
+	with(events = subject['__events']){
 		if(!events.hasOwnProperty(action)){
 			var self = events[action] = {
 				'listeners':[],
@@ -25,11 +28,13 @@ var When = function(subject, action){
 				else events[action].remove_all();
 				return $Self;
 			}
-			if(listener) events[action]['listeners'].push(listener); // Add listener to before or after original
+			if(listener) events[action]['listeners'].push(function(args){ if(conditions(args)==true) listener(args); }); // Add listener to before or after original
 			else events[action].remove_all(); // Remove all listeners
 			return $Self;
 		}
+		$Self['remove'] = function(listener){ events[action]['remove'](listener); };
+		$Self['remove_all'] = function(){ events[action]['remove_all'](); }
 		return $Self;
 	}
 }
-exports.when = When;
+if(typeof exports != 'undefined') exports.whenever = Whenever;
