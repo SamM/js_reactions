@@ -1,8 +1,8 @@
 var Whenever = function(subject, action, conditions){
 	if(!subject.hasOwnProperty('__events')) subject['__events'] = {};
-	if(!conditions) conditions = function(){return true;}
-	if(typeof subject[action] != 'function') subject[action] = function(){};
+	if(typeof subject[action] != 'function') subject[action] = function(a){return a;};
 	var original = subject[action];
+	if(!conditions) var conditions = function(args){ return true; };
 	with(events = subject['__events']){
 		if(!events.hasOwnProperty(action)){
 			var self = events[action] = {
@@ -18,7 +18,7 @@ var Whenever = function(subject, action, conditions){
 			};
 			
 			subject[action] = function(){
-				var a = [].slice.call(arguments); events[action].tell_all(arguments);
+				var a = [].slice.call(arguments); self.tell_all(a);
 				return original(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[9],a[10]);
 			};
 		}
@@ -37,4 +37,3 @@ var Whenever = function(subject, action, conditions){
 		return $Self;
 	}
 }
-if(typeof exports != 'undefined') exports.whenever = Whenever;
